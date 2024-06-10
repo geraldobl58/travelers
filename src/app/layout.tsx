@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 
 import { Poppins } from "next/font/google";
 
+import { ClerkProvider } from "@clerk/nextjs";
+
+import { ptBR } from "@clerk/localizations";
+
 import "./globals.css";
 
 const font = Poppins({
@@ -20,8 +24,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={font.className}>{children}</body>
-    </html>
+    <ClerkProvider localization={ptBR}>
+      <html lang="en">
+        <body className={font.className}>{children}</body>
+      </html>
+    </ClerkProvider>
   );
 }
