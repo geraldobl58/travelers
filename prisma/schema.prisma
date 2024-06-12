@@ -35,8 +35,8 @@ model Hotel {
   rooms    Room[]
   bookings Booking[]
 
-  addedAt    DateTime @default(now())
-  uupdatedAt DateTime @default(now())
+  addedAt   DateTime @default(now())
+  updatedAt DateTime @default(now())
 
   @@fulltext([title])
 }
