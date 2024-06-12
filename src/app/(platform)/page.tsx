@@ -1,7 +1,11 @@
-import { UserButton } from "@clerk/nextjs";
+import { Banner } from "@/components/banner";
 
 const Home = () => {
-  return <div>Home</div>;
+  return (
+    <>
+      <Banner />
+    </>
+  );
 };
 
 export default Home;

@@ -7,13 +7,10 @@ interface PlatformLayoutProps {
 
 const PlatformLayout = ({ children }: PlatformLayoutProps) => {
   return (
-    <>
+    <div>
       <Navbar />
-      <Banner />
-      <main className="max-w-screen-2xl w-full mx-auto xl:px-20 px-4 py-4">
-        {children}
-      </main>
-    </>
+      <main>{children}</main>
+    </div>
   );
 };
 
