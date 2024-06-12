@@ -1,4 +1,3 @@
-import { Banner } from "@/components/banner";
 import { Navbar } from "@/components/navbar";
 
 interface PlatformLayoutProps {

@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider localization={ptBR}>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body className={font.className}>
           <Toaster />
           {children}
