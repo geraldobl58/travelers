@@ -3,6 +3,8 @@
 
 import { useEffect, useState } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { useForm } from "react-hook-form";
 
 import Image from "next/image";
@@ -15,7 +17,15 @@ import axios from "axios";
 
 import { toast } from "sonner";
 
-import { Loader2, XCircle } from "lucide-react";
+import {
+  EyeIcon,
+  Loader2,
+  PencilLineIcon,
+  PlusIcon,
+  Terminal,
+  TrashIcon,
+  XCircle,
+} from "lucide-react";
 
 import { ICity, IState } from "country-state-city";
 
@@ -40,6 +50,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 import useLocation from "@/hooks/useLocation";
 
@@ -48,6 +66,7 @@ import { formSchema } from "@/schema/hotel";
 import { UploadButton } from "@/lib/uploadthing";
 
 import { HotelWithRooms } from "@/types";
+import { AddRoomForm } from "./add-room-form";
 
 interface AddHotelFormProps {
   hotel: HotelWithRooms | null | undefined;
@@ -61,6 +80,10 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
   const [states, setStates] = useState<IState[]>([]);
   const [cities, setCities] = useState<ICity[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isHotelDeleting, setIsHotelDeleting] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const router = useRouter();
 
   const { getAllCountries, getCountryStates, getStateCities } = useLocation();
 
@@ -68,7 +91,7 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
 
   const form = useForm<HotelForm>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: hotel || {
       title: "",
       description: "",
       image: "",
@@ -92,6 +115,16 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
   });
 
   useEffect(() => {
+    if (typeof image === "string") {
+      form.setValue("image", image, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    }
+  }, [image]);
+
+  useEffect(() => {
     const selectedCountry = form.watch("coutry");
     const countryStates = getCountryStates(selectedCountry);
 
@@ -111,7 +144,36 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
   }, [form.watch("coutry"), form.watch("state")]);
 
   const onSubmit = (data: HotelForm) => {
-    console.log(data);
+    setIsLoading(true);
+
+    if (hotel) {
+      axios
+        .patch(`/api/hotel/${hotel.id}`, data)
+        .then((res) => {
+          toast.success("Registro atualizado com sucesso!");
+        })
+        .catch((error) => {
+          console.log(error);
+          toast.error("Houve um erro ao atualizar o registro!");
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else {
+      axios
+        .post("/api/hotel", data)
+        .then((res) => {
+          toast.success("Registro criado com sucesso!");
+          router.push(`/hotel/${res.data.id}`);
+        })
+        .catch((error) => {
+          console.log(error);
+          toast.error("Houve um erro ao criar o registro!");
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
   };
 
   const handleImageDelete = (image: string) => {
@@ -133,6 +195,34 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
       .finally(() => {
         setImageIsDeleting(false);
       });
+  };
+
+  const handleDeleteHotel = async (hotel: HotelWithRooms) => {
+    setIsHotelDeleting(true);
+
+    const getImageKey = (src: string) =>
+      src.substring(src.lastIndexOf("/") + 1);
+
+    try {
+      const imageKey = getImageKey(hotel?.image);
+      await axios.post("/api/uploadthing/delete", { imageKey });
+      await axios.delete(`/api/hotel/${hotel.id}`);
+
+      setIsHotelDeleting(false);
+
+      toast.success("Registro excluido com sucesso.");
+
+      router.push("/hotel/new");
+    } catch (error) {
+      console.log(error);
+      toast.error("Houve um erro ao excluir o registro.");
+    } finally {
+      setIsHotelDeleting(false);
+    }
+  };
+
+  const handleDialogOpen = () => {
+    setOpen((prev) => !prev);
   };
 
   return (
@@ -452,7 +542,7 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
               <div className="grid sm:grid-cols-1 md:grid-cols-1 grid-cols-1 mt-4">
                 <FormField
                   control={form.control}
-                  name="description"
+                  name="locationDescription"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Descrição do local</FormLabel>
@@ -478,9 +568,10 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
                     </FormDescription>
                     <FormControl>
                       {image ? (
-                        <div className="relative max-w-[400px] min-w-[400px] max-h-[400px] min-h-[400px]">
+                        <div className="relative">
                           <Image
-                            fill
+                            width={1000}
+                            height={1000}
                             alt="Hotel"
                             src={image}
                             className="object-contain"
@@ -490,10 +581,10 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
                             size="icon"
                             variant="destructive"
                             onClick={() => handleImageDelete(image)}
-                            className="absolute right-2 top-[90px]"
+                            className="absolute right-2 top-[10px]"
                           >
                             {imageIsDeleting ? (
-                              <Loader2 className="size-4" />
+                              <Loader2 className="size-4 animate-spin" />
                             ) : (
                               <XCircle className="size-4" />
                             )}
@@ -519,7 +610,101 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
                 )}
               />
             </div>
-            <Button type="submit">Enviar</Button>
+            {hotel && !hotel.rooms.length && (
+              <Alert>
+                <Terminal className="size-4" />
+                <AlertTitle>Quase lá 😁</AlertTitle>
+                <AlertDescription>
+                  Seu hotel foi criado com sucesso.
+                </AlertDescription>
+                <AlertDescription>
+                  Adicione alguns <strong>quartos</strong> para concluir a
+                  configuração do seu hotel!
+                </AlertDescription>
+              </Alert>
+            )}
+            <div className="flex items-center justify-end gap-4">
+              {hotel && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  disabled={isHotelDeleting || isLoading}
+                  onClick={() => handleDeleteHotel(hotel)}
+                >
+                  {isHotelDeleting ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin mr-2" />
+                      Carregando...
+                    </>
+                  ) : (
+                    <>
+                      <TrashIcon className="size-4 mr-2" />
+                      Excluir
+                    </>
+                  )}
+                </Button>
+              )}
+              {hotel && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push(`/details/${hotel.id}`)}
+                >
+                  <EyeIcon className="size-4 mr-2" />
+                  Ver mais
+                </Button>
+              )}
+
+              {hotel && (
+                <Dialog open={open} onOpenChange={setOpen}>
+                  <DialogTrigger>
+                    <Button type="button" variant="outline">
+                      <PlusIcon className="size-4 mr-2" /> Adicionar Quartos
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-[900px] w-[90%]">
+                    <DialogHeader>
+                      Adicione detalhes sobre seu quarto.
+                      <DialogDescription>sadas</DialogDescription>
+                    </DialogHeader>
+                    <AddRoomForm
+                      hotel={hotel}
+                      handleDialogOpen={handleDialogOpen}
+                    />
+                  </DialogContent>
+                </Dialog>
+              )}
+
+              {hotel ? (
+                <Button>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin mr-2" />
+                      Carregando...
+                    </>
+                  ) : (
+                    <>
+                      <PencilLineIcon className="size-4 mr-2" />
+                      Atualizar
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin mr-2" />
+                      Carregando...
+                    </>
+                  ) : (
+                    <>
+                      <PencilLineIcon className="size-4 mr-2" />
+                      Salvar
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
           </form>
         </Form>
       </div>
