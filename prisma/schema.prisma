@@ -49,7 +49,7 @@ model Room {
   guestCount    Int     @default(0)
   bathroomCount Int     @default(0)
   kingBed       Int     @default(0)
-  queenBen      Int     @default(0)
+  queenBed      Int     @default(0)
   image         String
   beakFastPrice Int
   roomPrice     Int
