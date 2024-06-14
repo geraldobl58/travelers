@@ -381,7 +381,7 @@ export const AddRoomForm = ({
             name="guestCount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Camas</FormLabel>
+                <FormLabel>Hóspedes</FormLabel>
                 <FormControl>
                   <Input
                     type="number"

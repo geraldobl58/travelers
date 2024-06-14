@@ -58,6 +58,8 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { AddRoomForm } from "@/components/add-room-form";
+import { RoomCard } from "@/components/room-card";
 
 import useLocation from "@/hooks/useLocation";
 
@@ -66,7 +68,6 @@ import { formSchema } from "@/schema/hotel";
 import { UploadButton } from "@/lib/uploadthing";
 
 import { HotelWithRooms } from "@/types";
-import { AddRoomForm } from "./add-room-form";
 
 interface AddHotelFormProps {
   hotel: HotelWithRooms | null | undefined;
@@ -665,7 +666,6 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
                   <DialogContent className="max-w-[900px] w-[90%]">
                     <DialogHeader>
                       Adicione detalhes sobre seu quarto.
-                      <DialogDescription>sadas</DialogDescription>
                     </DialogHeader>
                     <AddRoomForm
                       hotel={hotel}
@@ -703,6 +703,21 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
                     </>
                   )}
                 </Button>
+              )}
+            </div>
+            <div>
+              {hotel && !!hotel.rooms.length && (
+                <>
+                  <Separator />
+                  <div className="mt-2">
+                    <h2 className="text-md text-muted-foreground font-semibold">
+                      Items adicionais
+                    </h2>
+                    {hotel.rooms.map((room) => (
+                      <RoomCard key={room.id} hotel={hotel} room={room} />
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           </form>
