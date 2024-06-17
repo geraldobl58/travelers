@@ -15,7 +15,7 @@ model Hotel {
   title               String  @db.Text
   description         String  @db.LongText
   image               String
-  coutry              String
+  country             String
   state               String
   city                String
   locationDescription String  @db.LongText

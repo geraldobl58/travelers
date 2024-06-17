@@ -10,7 +10,7 @@ export const formSchema = z.object({
   image: z.string().min(1, {
     message: "Campo obrigátorio",
   }),
-  coutry: z.string().min(1, {
+  country: z.string().min(1, {
     message: "Campo obrigátorio",
   }),
   state: z.string().optional(),

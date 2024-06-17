@@ -96,7 +96,7 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
       title: "",
       description: "",
       image: "",
-      coutry: "",
+      country: "",
       state: "",
       city: "",
       locationDescription: "",
@@ -126,23 +126,23 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
   }, [image]);
 
   useEffect(() => {
-    const selectedCountry = form.watch("coutry");
+    const selectedCountry = form.watch("country");
     const countryStates = getCountryStates(selectedCountry);
 
     if (countryStates) {
       setStates(countryStates);
     }
-  }, [form.watch("coutry")]);
+  }, [form.watch("country")]);
 
   useEffect(() => {
-    const selectedCountry = form.watch("coutry");
+    const selectedCountry = form.watch("country");
     const selectedState = form.watch("state");
     const stateCities = getStateCities(selectedCountry, selectedState);
 
     if (stateCities) {
       setCities(stateCities);
     }
-  }, [form.watch("coutry"), form.watch("state")]);
+  }, [form.watch("country"), form.watch("state")]);
 
   const onSubmit = (data: HotelForm) => {
     setIsLoading(true);
@@ -152,6 +152,7 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
         .patch(`/api/hotel/${hotel.id}`, data)
         .then((res) => {
           toast.success("Registro atualizado com sucesso!");
+          router.push(`/api/hotel/${hotel.id}`);
         })
         .catch((error) => {
           console.log(error);
@@ -451,7 +452,7 @@ export const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
               <div className="grid sm:grid-cols-3 md:grid-cols-3 grid-cols-1 gap-4">
                 <FormField
                   control={form.control}
-                  name="coutry"
+                  name="country"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>País</FormLabel>
